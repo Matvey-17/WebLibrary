@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<h2>Login</h2>
+<form id="login-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Login</button>
+    <a href="{% url 'users:register' %}">Зарегистрироваться</a>
+</form>
+<div id="form-errors" class="alert alert-danger" style="display: none;"></div>
+<script>
+    document.getElementById('login-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const data = {
+            username: document.getElementById('id_username').value,
+            password: document.getElementById('id_password').value,
+        };
+
+        fetch('http://127.0.0.1:8000/api/users/login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': window.csrfToken
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.auth_token) {
+                window.location.href = '/library';
+                localStorage.setItem('token', data.auth_token);
+            } else {
+                displayErrors(data);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    function displayErrors(errors) {
+        const errorsContainer = document.getElementById('form-errors');
+        errorsContainer.innerHTML = '';
+        errorsContainer.style.display = 'block';
+
+        for (let field in errors) {
+            if (errors.hasOwnProperty(field)) {
+                const errorList = errors[field].map(err => `<li>${err}</li>`).join('');
+                errorsContainer.innerHTML += `<strong>${field}:</strong><ul>${errorList}</ul>`;
+            }
+        }
+    }
+</script>
+{% endblock %}

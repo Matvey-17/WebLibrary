@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}My Books{% endblock %}
+{% block content %}
+<h2>My Books</h2>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>Borrowed Date</th>
+        <th>Days Held</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for book in books %}
+    <tr>
+        <td>{{ book.book.name }}</td>
+        <td>{{ book.data }}</td>
+        {% if book.days_held == 0 %}
+        <td>Книга взята сегодня</td>
+        {% else %}
+        <td>{{ book.days_held }}</td>
+        {% endif %}
+        <td>
+            <button class="btn btn-secondary delete-btn" data-book-id="{{ book.book.id }}" id="no-borrow">Remove
+            </button>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<script>
+    window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.delete-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var bookId = this.getAttribute('data-book-id');
+                fetch(`/api/remove_book/${bookId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': window.csrfToken
+                    },
+                    body: JSON.stringify({
+                        'action': 'remove'
+                    })
+                }).then(response => {
+                    if (response.ok) {
+                        alert('Book removed successfully');
+                    } else {
+                        return response.json().then(data => {
+                            alert(data.detail);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    });
+</script>
+{% endblock %}

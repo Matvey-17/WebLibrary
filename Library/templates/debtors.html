@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Debtors{% endblock %}
+{% block content %}
+    <h2>Debtors List</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Address</th>
+                <th>Book Title</th>
+                <th>Borrowed Date</th>
+                <th>Days Held</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for debtor in debtors %}
+                <tr>
+                    <td>{{ debtor.reader.username }}</td>
+                    <td>{{ debtor.reader.first_name }}</td>
+                    <td>{{ debtor.reader.last_name }}</td>
+                    <td>{{ debtor.reader.address }}</td>
+                    <td>{{ debtor.book.name }}</td>
+                    <td>{{ debtor.data}}</td>
+                    {% if debtor.days_held == 0 %}
+                    <td>Книга взята сегодня</td>
+                    {% else %}
+                    <td>{{ debtor.days_held }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

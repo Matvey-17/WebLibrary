@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Catalog{% endblock %}
+{% block content %}
+<h2>Book Catalog</h2>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Genre</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for book in books %}
+    <tr>
+        <td>{{ book.name }}</td>
+        <td>{{ book.author }}</td>
+        <td>{{ book.genre }}</td>
+        <td>
+            <button class="btn btn-primary borrow-btn" data-book-id="{{ book.id }}" id="borrow">Borrow</button>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<script>
+    window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.borrow-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var bookId = this.getAttribute('data-book-id');
+                fetch(`/api/add_book/${bookId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': window.csrfToken
+                    },
+                    body: JSON.stringify({
+                        'action': 'borrow'
+                    })
+                }).then(response => {
+                    if (response.ok) {
+                        alert('Book borrowed successfully');
+                    } else {
+                        return response.json().then(data => {
+                            alert(data.detail);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    });
+</script>
+{% endblock %}

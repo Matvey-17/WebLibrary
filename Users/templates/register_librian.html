@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<h2>Register</h2>
+<form id="register-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Register Librian</button>
+</form>
+
+<div id="form-errors" class="alert alert-danger" style="display: none;"></div>
+<script>
+    document.getElementById('register-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const data = {
+            username: document.getElementById('id_username').value,
+            password1: document.getElementById('id_password1').value,
+            password2: document.getElementById('id_password2').value,
+            personnel_number: document.getElementById('id_personnel_number').value
+        };
+
+        fetch('http://127.0.0.1:8000/api/users/register_librian/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': window.csrfToken
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.user) {
+                window.location.href = '/users/login/';
+            } else {
+                displayErrors(data);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    function displayErrors(errors) {
+        const errorsContainer = document.getElementById('form-errors');
+        errorsContainer.innerHTML = '';
+        errorsContainer.style.display = 'block';
+
+        for (let field in errors) {
+            if (errors.hasOwnProperty(field)) {
+                const errorList = errors[field].map(err => `<li>${err}</li>`).join('');
+                errorsContainer.innerHTML += `<strong>${field}:</strong><ul>${errorList}</ul>`;
+            }
+        }
+    }
+</script>
+{% endblock %}
+
+
